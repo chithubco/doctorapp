@@ -55,7 +55,7 @@ class authProcedures {
 		// use the logon form. Possible hack.
 		//-------------------------------------------
 		if(strlen($params->authPass) >= 15){
-			return array('success' => false, 'type' => 'error', 'message' => 'Possible hack, please use the Logon Screen.');
+			//return array('success' => false, 'type' => 'error', 'message' => 'Possible hack, please use the Logon Screen.');
 		}
 		//-------------------------------------------
 		// Simple check username
@@ -122,6 +122,7 @@ class authProcedures {
 			$sql = "SELECT * FROM version LIMIT 1";
 			$db->setSQL($sql);
 			$version = $db->fetchRecord();
+			$_SESSION['forgot'] = false;
 			$_SESSION['ver']['codeName'] = $version['v_tag'];
 			$_SESSION['ver']['major'] = $version['v_major'];
 			$_SESSION['ver']['rev'] = $version['v_patch'];
@@ -149,10 +150,146 @@ class authProcedures {
 		$p = new Patient();
 		$s->logoutSession();
 		session_unset();
-		session_destroy();
+		//session_destroy(); /Fix for the session destroy
+		try {
+			$_SESSION = array();
+			setcookie(session_name(), '', time() - 3600, '/');
+			session_destroy();
+		}
+		catch (Exception $Ex) {
+			;
+		}
 		return;
 	}
 
+	/**
+	 * @param stdClass $params
+	 * @return int
+	 */
+	public function passwordRecovery(stdClass $params){
+		error_reporting(E_ALL);
+		//-------------------------------------------
+		// Check that the username do not pass
+		// the maximum limit of the field.
+		//
+		// NOTE:
+		// If this condition is met, the user did not
+		// use the logon form. Possible hack.
+		//-------------------------------------------
+		if(strlen($params->authUser) >= 26){
+			return array('success' => false, 'type' => 'error', 'message' => 'Possible hack, please use the Logon Screen.');
+		}
+		//-------------------------------------------
+		// Check that the username do not pass
+		// the maximum limit of the field.
+		//
+		// NOTE:
+		// If this condition is met, the user did not
+		// use the logon form. Possible hack.
+		//-------------------------------------------
+		if(strlen($params->authPass) >= 15){
+			//return array('success' => false, 'type' => 'error', 'message' => 'Possible hack, please use the Logon Screen.');
+		}
+		//-------------------------------------------
+		// Simple check username
+		//-------------------------------------------
+		if(!$params->authUser){
+			return array('success' => false, 'type' => 'error', 'message' => 'The username field can not be in blank. Try again.');
+		}
+		//-------------------------------------------
+		// Simple check password
+		//-------------------------------------------
+		if(!$params->authPass){
+			return array('success' => false, 'type' => 'error', 'message' => 'The password field can not be in blank. Try again.');
+		}
+		//-------------------------------------------
+		// Find the AES key in the selected site
+		// And include the rest of the remaining
+		// variables to connect to the database.
+		//-------------------------------------------
+		define('_GaiaEXEC', 1);
+		$root = dirname(dirname(__FILE__));
+		include_once($root . '/registry.php');
+		include_once($root . '/classes/MatchaHelper.php');
+		$fileConf = $root . '/sites/' . $params->site . '/conf.php';
+		if(file_exists($fileConf)){
+			/** @noinspection PhpIncludeInspection */
+			include_once($fileConf);
+			$db = new MatchaHelper();
+			$err = $db->getError();
+			if(!is_array($err)){
+				return array('success' => false, 'type' => 'error', 'message' => 'For some reason, I can\'t connect to the database.');
+			}
+			// Do not stop here!, continue with the rest of the code.
+		} else{
+			return array('success' => false, 'type' => 'error', 'message' => 'No configuration file found for site <span style="font-weight:bold">' . $params->site . '</span>.<br>Please double check URL or contact support desk.');
+		}
+		//-------------------------------------------
+		// remove empty spaces single and double quotes from username and password
+		//-------------------------------------------
+		$params->authUser = trim(str_replace(array('\'', '"'), '', $params->authUser));
+		$params->authPass = trim(str_replace(array('\'', '"'), '', $params->authPass));
+
+		//-------------------------------------------
+		// Username & password match
+		//-------------------------------------------
+		$u = MatchaModel::setSenchaModel('App.model.administration.User');
+		$user = $u->load(array('username' => $params->authUser, 'authorized' => 1), array('id', 'username', 'title', 'fname', 'mname', 'lname', 'email', 'facility_id', 'password'))->one();
+
+		if($user === false || $params->authPass != $user['password']){
+			return array('success' => false, 'type' => 'error', 'message' => 'The username or password you provided is invalid.');
+		} else{
+			//-------------------------------------------
+			// Change some User related variables and go
+			//-------------------------------------------
+			$_SESSION['user']['name'] = trim($user['title'] . ' ' . $user['lname'] . ', ' . $user['fname'] . ' ' . $user['mname']);
+			$_SESSION['user']['id'] = $user['id'];
+			$_SESSION['user']['email'] = $user['email'];
+			$_SESSION['user']['facility'] = ($params->facility == 0 ? $user['facility_id'] : $params->facility);
+			$_SESSION['user']['site'] = $params->site;
+			$_SESSION['user']['auth'] = true;
+			//-------------------------------------------
+			// Also fetch the current version of the
+			// Application & Database
+			//-------------------------------------------
+			$sql = "SELECT * FROM version LIMIT 1";
+			$db->setSQL($sql);
+			$version = $db->fetchRecord();
+			$_SESSION['forgot'] = false;
+			$_SESSION['ver']['codeName'] = $version['v_tag'];
+			$_SESSION['ver']['major'] = $version['v_major'];
+			$_SESSION['ver']['rev'] = $version['v_patch'];
+			$_SESSION['ver']['minor'] = $version['v_minor'];
+			$_SESSION['ver']['database'] = $version['v_database'];
+			$_SESSION['site']['localization'] = $params->lang;
+			$_SESSION['site']['checkInMode'] = $params->checkInMode;
+			$_SESSION['timeout'] = time();
+			$session = new Sessions();
+			$_SESSION['user']['token'] = MatchaUtils::__encrypt('{"uid":' . $user['id'] . ',"sid":' . $session->loginSession() . ',"site":"' . $params->site . '"}');
+			$_SESSION['inactive']['timeout'] = time();
+
+			unset($db);
+
+			return array('success' => true, 'token' => $_SESSION['user']['token'], 'user' => array('id' => $_SESSION['user']['id'], 'name' => $_SESSION['user']['name'], 'email' => $_SESSION['user']['email'], 'facility' => $_SESSION['user']['facility']));
+		}
+	}
+
+	public function doForget(stdClass $params) {
+		$_SESSION['forgot'] = true;
+		return true;
+	}
+	public function doSetPID($pid) { //for encounters
+		$_SESSION['pid'] = $pid;
+		return true;
+	}
+	public function doCreateEncounter(stdClass $params) {
+
+		return true;
+	}
+
+	public function recoverPassword(stdClass $params) {
+		return true;
+	}
 	/**
 	 * @static
 	 * @return int
