@@ -17,12 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-session_name('GaiaEHR');
+session_name('PhoneADoctor'); //[Update] : Change Session Name to PhoneADoctor
 session_start();
 session_cache_limiter('private');
 define('_GaiaEXEC', 1);
 
-$_SESSION['version'] = '0.7.210';
+$_SESSION['version'] = '1.0.000'; //[Update] : PhoneADoctor Version '0.7.210';
 $_SESSION['extjs'] = 'extjs-4.1.1a';
 
 //include_once('classes/Mobile_Detect.php');
@@ -80,9 +80,14 @@ $mDebug = false;
 			unset($_SESSION['site']);
             $_SESSION['install'] = true;
 			include_once('_install.php');
-		} else {
+		} elseif (isset($_SESSION['forgot']) && $_SESSION['forgot'] == true) { // [New] : Added for Forgot Password
 			$_SESSION['user']['auth'] = false;
-            $_SESSION['install'] = false;
+			$_SESSION['install'] = false;
+			unset($_SESSION['forgot']);
+			include_once('_forgot.php');
+		}else {
+			$_SESSION['user']['auth'] = false;
+			$_SESSION['install'] = false;
 			include_once('_login.php');
 		}
 	}
