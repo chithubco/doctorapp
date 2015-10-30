@@ -170,7 +170,37 @@ Ext.define('App.view.administration.Users', {
 							        name: 'lname'
 						        }
 					        ]
-				        },
+				        }, //[[New] Added to edit email field
+						{
+							xtype: 'fieldcontainer',
+							defaults: {
+								hideLabel: true
+							},
+							layout: {
+								type: 'hbox',
+								defaultMargins: {
+									top: 0,
+									right: 5,
+									bottom: 0,
+									left: 0
+								}
+							},
+							msgTarget: 'under',
+							items: [
+								{
+									width: 100,
+									xtype: 'displayfield',
+									value: 'Email: '
+								},
+								{
+									width: 465,
+									xtype: 'textfield',
+									name: 'email',
+									regex:/^((([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z\s?]{2,5}){1,25})*(\s*?;\s*?)*)*$/,
+									regexText:'This field must contain a valid email address'
+								}
+							]
+						},
 				        {
 					        xtype: 'fieldcontainer',
 					        msgTarget: 'under',
@@ -388,7 +418,32 @@ Ext.define('App.view.administration.Users', {
 					        xtype: 'textfield',
 					        name: 'notes',
 					        emptyText: i18n('additional_info')
-				        }
+				        }, //[[New] Added to edit online field
+						{
+							xtype: 'fieldcontainer',
+							defaults: {
+								hideLabel: false
+							},
+							layout: {
+								type: 'hbox',
+								defaultMargins: {
+									top: 0,
+									right: 5,
+									bottom: 0,
+									left: 0
+								}
+							},
+							msgTarget: 'under',
+							items: [
+								{
+									width: 150,
+									xtype: 'checkbox',
+									fieldLabel: 'Is Online?',
+									name: 'online'
+
+								}
+							]
+						}
 			        ]
 		        })
 	        ],
