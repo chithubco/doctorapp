@@ -1001,7 +1001,7 @@ Ext.define('App.view.patient.Summary', {
                         pid: me.pid
                     },
 	                function(balance){
-                        billingPanel.update(i18n('account_balance') + ': $' + balance);
+                        ;//billingPanel.update(i18n('account_balance') + ': $' + balance);
                     }
                 );
             }
