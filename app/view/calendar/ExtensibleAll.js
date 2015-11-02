@@ -6106,7 +6106,7 @@ Ext.define('Extensible.calendar.form.EventDetails', {
              */
             eventcancel: true
         });
-                
+
         this.titleField = Ext.create('Ext.form.TextField', {
             fieldLabel: this.titleLabelText,
             name: Extensible.calendar.data.EventMappings.Title.name,
@@ -6195,6 +6195,8 @@ Ext.define('Extensible.calendar.form.EventDetails', {
         }];
         
         this.fbar = [{
+            itemId:this.id+'-encounter-btn',text:'Create Encounter', scope: this, handler: this.onCreateEncounter //Create Encounter
+        },'->',{
             text:this.saveButtonText, scope: this, handler: this.onSave
         },{
             itemId:this.id+'-del-btn', text:this.deleteButtonText, scope:this, handler:this.onDelete
@@ -6245,9 +6247,11 @@ Ext.define('Extensible.calendar.form.EventDetails', {
         if (rec.phantom) {
             me.setTitle(me.titleTextAdd);
             me.down('#' + me.id + '-del-btn').hide();
+            me.down('#' + me.id + '-del-btn').hide();
         }
         else {
             me.setTitle(me.titleTextEdit);
+            me.down('#' + me.id + '-del-btn').show();
             me.down('#' + me.id + '-del-btn').show();
         }
         
@@ -6318,7 +6322,41 @@ Ext.define('Extensible.calendar.form.EventDetails', {
             this.form.reset();
         }
     },
-    
+    //onCreateEncounter : For Non-Popup Window
+    onCreateEncounter: function(){
+        var me = this,
+            form = me.form,
+            params = form.getValues();
+
+        authProcedures.doCreateEncounter(params, function(provider, response){
+            //formPanel.el.unmask();
+            //window.location = './';
+            ;
+        });
+
+        //if (!me.form.isValid() && !me.allowDefaultAdd) {
+        //    return;
+        //}
+        //
+        //if (!me.updateRecord(me.activeRecord)) {
+        //    me.onCancel();
+        //    return;
+        //}
+        //
+        //if (me.activeRecord.phantom) {
+        //    me.fireEvent('eventadd', me, me.activeRecord);
+        //}
+        //else {
+        //    if (originalHasRecurrence) {
+        //        // We only need to prompt when editing an existing recurring event. If a normal
+        //        // event is edited to make it recurring just do a standard update.
+        //        me.onRecurrenceUpdate();
+        //    }
+        //    else {
+        //        me.fireEvent('eventupdate', me, me.activeRecord);
+        //    }
+        //}
+    },
     // private
     onSave: function(){
         var me = this,
@@ -6407,6 +6445,7 @@ Ext.define('Extensible.calendar.form.EventDetails', {
  * @constructor
  * @param {Object} config The config object
  */
+
 Ext.define('Extensible.calendar.form.EventWindow', {
     extend: 'Ext.window.Window',
     alias: 'widget.extensible.eventeditwindow',
@@ -6417,7 +6456,7 @@ Ext.define('Extensible.calendar.form.EventWindow', {
         'Extensible.calendar.data.EventMappings',
         'Extensible.form.recurrence.RangeEditWindow'
     ],
-    
+
     // Locale configs
     titleTextAdd: 'Add Event',
     titleTextEdit: 'Edit Event',
@@ -6426,13 +6465,14 @@ Ext.define('Extensible.calendar.form.EventWindow', {
     detailsLinkText: 'Edit Details...',
     savingMessage: 'Saving changes...',
     deletingMessage: 'Deleting event...',
+    encounterButtonText: 'Create Encounter', //[Add] : For encounter
     saveButtonText: 'Save',
     deleteButtonText: 'Delete',
     cancelButtonText: 'Cancel',
 	patientLabelTex     : 'Patient',            // GaiaEHR
 	categoryLabelTex    : 'Category',           // GaiaEHR
 	facilityLabelTex    : 'Facility',           // GaiaEHR
-	billingLabelTex     : 'Billing Facility',   // GaiaEHR
+	billingLabelTex     : 'Billing Facility1',   // GaiaEHR
 	statusLabelTex      : 'Status',             // GaiaEHR
 	titleLabelText      : 'Notes',              // GaiaEHR
 	datesLabelText      : 'When',               // GaiaEHR
@@ -6515,20 +6555,27 @@ Ext.define('Extensible.calendar.form.EventWindow', {
              */
             editdetails: true
         });
-        
+
+        this.newEncounterWindow = Ext.create('App.view.patient.windows.NewEncounter');
         this.fbar = this.getFooterBarConfig();
         
         this.callParent(arguments);
     },
     
     getFooterBarConfig: function() {
-        var cfg = [{
-                text: this.saveButtonText,
-                itemId: this.id + '-save-btn',
-                disabled: false,
-                handler: this.onSave,
-                scope: this
-            },{
+        var cfg = [{ //[Add] : Create Encounter Button
+            text: this.encounterButtonText,
+            itemId: this.id + '-encounter-btn',
+            disabled: false,
+            handler: this.onEncounter,
+            scope: this
+        },'->',{
+            text: this.saveButtonText,
+            itemId: this.id + '-save-btn',
+            disabled: false,
+            handler: this.onSave,
+            scope: this
+        },{
                 text: this.deleteButtonText,
                 itemId: this.id + '-delete-btn',
                 disabled: false,
@@ -6664,6 +6711,7 @@ Ext.define('Extensible.calendar.form.EventWindow', {
         // toolbar button refs
         this.saveButton = this.down('#' + this.id + '-save-btn');
         this.deleteButton = this.down('#' + this.id + '-delete-btn');
+        this.encounterButton = this.down('#' + this.id + '-encounter-btn');
         this.cancelButton = this.down('#' + this.id + '-cancel-btn');
         this.detailsButton = this.down('#' + this.id + '-details-btn');
         
@@ -6710,6 +6758,7 @@ Ext.define('Extensible.calendar.form.EventWindow', {
         // Only show the delete button if the data includes an EventID, otherwise
         // we're adding a new record
         me.deleteButton[o.data && o.data[EventMappings.EventId.name] ? 'show' : 'hide']();
+        me.encounterButton[o.data && o.data[EventMappings.EventId.name] ? 'show' : 'hide']();
         
         if (o.data) {
             rec = o;
@@ -6837,13 +6886,14 @@ Ext.define('Extensible.calendar.form.EventWindow', {
 
         return record.dirty || (record.phantom && this.allowDefaultAdd);
     },
-    
+    //onEncounter : For Popup Window
     // private
-    onSave: function(){
+    onEncounter: function(){
         var me = this,
             form = me.formPanel.form,
-            originalHasRecurrence = me.activeRecord.isRecurring();
-        
+            originalHasRecurrence = me.activeRecord.isRecurring(),
+            params = form.getValues();
+
         if (!form.isDirty() && !me.allowDefaultAdd) {
             me.onCancel();
             return;
@@ -6851,12 +6901,44 @@ Ext.define('Extensible.calendar.form.EventWindow', {
         if (!form.isValid()) {
             return;
         }
-        
+
         if (!me.updateRecord(me.activeRecord)) {
             me.onCancel();
             return;
         }
-        
+
+        /*
+         * Show the Create New Encounter panel.
+         */
+        this.newEncounterWindow.myExtraParams = { note: params.Title, patient: params.Patient}; // Add additional stuff
+        this.newEncounterWindow.showWithData(params);
+        //this.newEncounterWindow.show();
+
+        authProcedures.doCreateEncounter(params, function(provider, response){
+            //formPanel.el.unmask();
+            //window.location = './';
+            ;
+        });
+    },
+
+    onSave: function(){
+        var me = this,
+            form = me.formPanel.form,
+            originalHasRecurrence = me.activeRecord.isRecurring();
+
+        if (!form.isDirty() && !me.allowDefaultAdd) {
+            me.onCancel();
+            return;
+        }
+        if (!form.isValid()) {
+            return;
+        }
+
+        if (!me.updateRecord(me.activeRecord)) {
+            me.onCancel();
+            return;
+        }
+
         if (me.activeRecord.phantom) {
             me.fireEvent('eventadd', me, me.activeRecord, me.animateTarget);
         }
@@ -6871,7 +6953,7 @@ Ext.define('Extensible.calendar.form.EventWindow', {
             }
         }
     },
-    
+
     // private
     onRecurrenceUpdate: function() {
         Extensible.form.recurrence.RangeEditWindow.prompt({

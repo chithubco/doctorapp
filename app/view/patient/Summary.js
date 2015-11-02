@@ -563,137 +563,138 @@ Ext.define('App.view.patient.Summary', {
             })
         }
 
-        if(acl['access_patient_preventive_care_alerts']){
-//            me.stores.push(
-//	            me.patientsDismissedAlerts = Ext.create('App.store.patient.DismissedAlerts', {
-//                    //listeners
+        //[Fix] : Remove from display
+//        if(acl['access_patient_preventive_care_alerts']){
+////            me.stores.push(
+////	            me.patientsDismissedAlerts = Ext.create('App.store.patient.DismissedAlerts', {
+////                    //listeners
+////                })
+////            );
+//            me.tabPanel.add({
+//                title: i18n('dismissed_preventive_care_alerts'),
+//                xtype: 'grid',
+//	            itemId:'PatientSummaryPreventiveCareAlertsPanel',
+//                store: Ext.create('App.store.patient.DismissedAlerts', {
+//	                //listeners
+//                }),
+//                columns: [
+//                    {
+//                        header: i18n('description'),
+//                        dataIndex: 'description'
+//                    },
+//                    {
+//                        xtype: 'datecolumn',
+//                        header: i18n('date'),
+//                        dataIndex: 'date',
+//                        format: 'Y-m-d'
+//
+//                    },
+//                    {
+//                        header: i18n('reason'),
+//                        dataIndex: 'reason',
+//                        flex: true
+//
+//                    },
+//                    {
+//                        header: i18n('observation'),
+//                        dataIndex: 'observation',
+//                        flex: true
+//                    },
+//                    {
+//                        header: i18n('dismissed'),
+//                        dataIndex: 'dismiss',
+//                        width: 60,
+//                        renderer: me.boolRenderer
+//                    }
+//                ],
+//                plugins: Ext.create('App.ux.grid.RowFormEditing', {
+//                    autoCancel: false,
+//                    errorSummary: false,
+//                    clicksToEdit: 1,
+//                    formItems: [
+//                        {
+//                            title: 'general',
+//                            xtype: 'container',
+//                            padding: 10,
+//                            layout: 'vbox',
+//                            items: [
+//                                {
+//                                    /**
+//                                     * Line one
+//                                     */
+//                                    xtype: 'fieldcontainer',
+//                                    layout: 'hbox',
+//                                    defaults: {
+//                                        margin: '0 10 5 0'
+//                                    },
+//                                    items: [
+//                                        {
+//                                            xtype: 'textfield',
+//                                            name: 'reason',
+//                                            fieldLabel: i18n('reason'),
+//                                            width: 585,
+//                                            labelWidth: 70,
+//                                            action: 'reason'
+//                                        }
+//                                    ]
+//
+//                                },
+//                                {
+//                                    /**
+//                                     * Line two
+//                                     */
+//                                    xtype: 'fieldcontainer',
+//                                    layout: 'hbox',
+//                                    defaults: {
+//                                        margin: '0 10 5 0'
+//                                    },
+//                                    items: [
+//                                        {
+//                                            xtype: 'textfield',
+//                                            fieldLabel: i18n('observation'),
+//                                            name: 'observation',
+//                                            width: 250,
+//                                            labelWidth: 70,
+//                                            action: 'observation'
+//                                        },
+//                                        {
+//                                            fieldLabel: i18n('date'),
+//                                            xtype: 'datefield',
+//                                            action: 'date',
+//                                            width: 200,
+//                                            labelWidth: 40,
+//                                            format: globals['date_display_format'],
+//                                            name: 'date'
+//
+//                                        },
+//                                        {
+//                                            xtype: 'checkboxfield',
+//                                            name: 'dismiss',
+//                                            fieldLabel: i18n('dismiss_alert')
+//
+//                                        }
+//                                    ]
+//
+//                                }
+//                            ]
+//                        }
+//                    ]
+//
 //                })
-//            );
-            me.tabPanel.add({
-                title: i18n('dismissed_preventive_care_alerts'),
-                xtype: 'grid',
-	            itemId:'PatientSummaryPreventiveCareAlertsPanel',
-                store: Ext.create('App.store.patient.DismissedAlerts', {
-	                //listeners
-                }),
-                columns: [
-                    {
-                        header: i18n('description'),
-                        dataIndex: 'description'
-                    },
-                    {
-                        xtype: 'datecolumn',
-                        header: i18n('date'),
-                        dataIndex: 'date',
-                        format: 'Y-m-d'
-
-                    },
-                    {
-                        header: i18n('reason'),
-                        dataIndex: 'reason',
-                        flex: true
-
-                    },
-                    {
-                        header: i18n('observation'),
-                        dataIndex: 'observation',
-                        flex: true
-                    },
-                    {
-                        header: i18n('dismissed'),
-                        dataIndex: 'dismiss',
-                        width: 60,
-                        renderer: me.boolRenderer
-                    }
-                ],
-                plugins: Ext.create('App.ux.grid.RowFormEditing', {
-                    autoCancel: false,
-                    errorSummary: false,
-                    clicksToEdit: 1,
-                    formItems: [
-                        {
-                            title: 'general',
-                            xtype: 'container',
-                            padding: 10,
-                            layout: 'vbox',
-                            items: [
-                                {
-                                    /**
-                                     * Line one
-                                     */
-                                    xtype: 'fieldcontainer',
-                                    layout: 'hbox',
-                                    defaults: {
-                                        margin: '0 10 5 0'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'textfield',
-                                            name: 'reason',
-                                            fieldLabel: i18n('reason'),
-                                            width: 585,
-                                            labelWidth: 70,
-                                            action: 'reason'
-                                        }
-                                    ]
-
-                                },
-                                {
-                                    /**
-                                     * Line two
-                                     */
-                                    xtype: 'fieldcontainer',
-                                    layout: 'hbox',
-                                    defaults: {
-                                        margin: '0 10 5 0'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'textfield',
-                                            fieldLabel: i18n('observation'),
-                                            name: 'observation',
-                                            width: 250,
-                                            labelWidth: 70,
-                                            action: 'observation'
-                                        },
-                                        {
-                                            fieldLabel: i18n('date'),
-                                            xtype: 'datefield',
-                                            action: 'date',
-                                            width: 200,
-                                            labelWidth: 40,
-                                            format: globals['date_display_format'],
-                                            name: 'date'
-
-                                        },
-                                        {
-                                            xtype: 'checkboxfield',
-                                            name: 'dismiss',
-                                            fieldLabel: i18n('dismiss_alert')
-
-                                        }
-                                    ]
-
-                                }
-                            ]
-                        }
-                    ]
-
-                })
-            })
-        }
-
-        if(acl['access_patient_billing']){
-            me.tabPanel.add({
-                xtype: 'panel',
-                action: 'balancePanel',
-                itemId: 'balancePanel',
-                title: i18n('billing'),
-                html: i18n('account_balance') + ': '
-
-            });
-        }
-
+//            })
+//        }
+//
+//        if(acl['access_patient_billing']){
+//            me.tabPanel.add({
+//                xtype: 'panel',
+//                action: 'balancePanel',
+//                itemId: 'balancePanel',
+//                title: i18n('billing'),
+//                html: i18n('account_balance') + ': '
+//
+//            });
+//        }
+//
         //if(acl['access_patient_reports']){
             me.reportPanel = me.tabPanel.add({
                 xtype: 'panel',
