@@ -95,10 +95,11 @@ class Rxnorm {
 	public function getRXNORMLiveSearch(stdClass $params){
 		$this->db->setSQL("SELECT *
                              FROM rxnconso
-                            WHERE (SAB = 'MMSL' AND TTY = 'BD')
+                            WHERE (SAB = 'RXNORM')
                               AND STR LIKE '%$params->query%'
                          GROUP BY RXCUI
                          LIMIT 100");
+		//WHERE (SAB = 'MMSL' AND TTY = 'BD')
 		$records = $this->db->fetchRecords(PDO::FETCH_ASSOC);
 		$total = count($records);
 		$records = array_slice($records, $params->start, $params->limit);
