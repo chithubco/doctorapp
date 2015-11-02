@@ -20,6 +20,7 @@
 include_once(dirname(dirname(__FILE__)) . '/classes/Time.php');
 include_once(dirname(__FILE__) . '/Patient.php');
 include_once(dirname(__FILE__) . '/User.php');
+include_once(dirname(__FILE__) . '/Person.php');
 include_once(dirname(__FILE__) . '/PoolArea.php');
 include_once(dirname(__FILE__) . '/Medical.php');
 include_once(dirname(__FILE__) . '/PreventiveCare.php');
@@ -109,12 +110,44 @@ class Encounter {
 	 *  Naming: "getPatientEncounters"
 	 */
 	public function getEncounters(stdClass $params){
-		$pid = $params->pid;
+		$pid=0;
+		if (isset($params->pid)) {
+			$pid = $params->pid;
+		} //[Add] : Error from listing encounters
+		elseif (isset($_SESSION['pid'])) {
+			$pid = $_SESSION['pid']; //To take care of encounteres
+		}
+		elseif (!isset($params->pid)) {return null;} //[Add] : Error from listing encounters
+
+		if ($pid == 0) {return null; }
+
+
 		$ORDERX = isset($params->sort) ? $params->sort[0]->property . ' ' . $params->sort[0]->direction : 'service_date DESC';
-		$this->db->setSQL("SELECT * FROM encounters WHERE pid = '$pid' ORDER BY $ORDERX");
+		$this->db->setSQL("SELECT encounters.eid, encounters.pid, encounters.open_uid,
+							encounters.brief_description,encounters.visit_category,
+							encounters.service_date, encounters.close_date,
+							encounters.onset_date, bb.name as billing_facility,
+							TIME_FORMAT(SEC_TO_TIME(TIMESTAMPDIFF(SECOND,encounters.service_date, encounters.close_date)),'%Hh %im %ss') as duration,
+							CONCAT_WS(' ', uu.fname, uu.mname,uu.lname) as provider,
+							ff.name as facility
+							FROM encounters
+							LEFT JOIN facility ff
+							on encounters.facility=ff.id
+							LEFT JOIN facility bb
+							on encounters.billing_facility=bb.id
+							LEFT JOIN users uu
+							on encounters.provider_uid = uu.id
+							WHERE  encounters.pid = '$pid' ORDER BY $ORDERX");
+
+		//[Update] : For encounter history to display text inside facility and biling facility instead of numbers
+		//$this->db->setSQL("SELECT * FROM encounters WHERE pid = '$pid' ORDER BY $ORDERX");
 		$rows = array();
 		foreach($this->db->fetchRecords(PDO::FETCH_ASSOC) as $row){
 			$row['status'] = ($row['close_date'] == null) ? 'open' : 'close';
+
+			//$row->provider = Person::fullname($row->fname, $row->mname, $row->lname);
+			//unset($row->fname, $row->mname, $row->lname);
+
 			array_push($rows, $row);
 		}
 		return $rows;

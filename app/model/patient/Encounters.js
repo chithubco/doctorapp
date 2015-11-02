@@ -71,6 +71,14 @@ Ext.define('App.model.patient.Encounters', {
 			name: 'onset_date',
 			type: 'date',
 			dateFormat: 'Y-m-d H:i:s'
+		},
+		{//[Added] : For Encounter views to list out the provider
+			name: 'provider',
+			type: 'string'
+		},
+		{//[Added] : For Encounter views to list out the duration of the encounter
+			name: 'duration',
+			type: 'string'
 		}
 	],
 	idProperty: 'eid',
