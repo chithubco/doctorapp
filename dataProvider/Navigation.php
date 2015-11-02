@@ -74,14 +74,15 @@ class Navigation
 //				'iconCls' => 'searchUsers',
 //				'id' => 'panelPatientSearch'
 //			),
-			array(
-				'text' => $this->i18n['area_floor_plan'],
-				'disabled' => false,
-				'leaf' => true,
-				'cls' => 'file',
-				'iconCls' => 'icoZoneAreas',
-				'id' => 'App.view.areas.FloorPlan'
-			),
+		//[Fix]:Removed from the list
+//			array(
+//				'text' => $this->i18n['area_floor_plan'],
+//				'disabled' => false,
+//				'leaf' => true,
+//				'cls' => 'file',
+//				'iconCls' => 'icoZoneAreas',
+//				'id' => 'App.view.areas.FloorPlan'
+//			),
 			array(
 				'text' => $this->i18n['patient_pool_areas'],
 				'disabled' => false,
@@ -191,6 +192,14 @@ class Navigation
 				'id' => 'App.view.administration.Facilities'
 			);
 		}
+		//if($this->ACL->hasPermission('access_security_questions')){
+			$admin['children'][] = array(
+				'text' => 'Security Questions',
+				'leaf' => true,
+				'cls' => 'file',
+				'id' => 'App.view.administration.SecurityQuestions'
+			);
+		//}
 		if($this->ACL->hasPermission('access_users')){
 			$admin['children'][] = array(
 				'text' => $this->i18n['users'],
