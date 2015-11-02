@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+require_once(dirname(__FILE__) . '/../lib/PHPMailer/class.phpmailer.php');
 include_once(dirname(__FILE__) . '/Person.php');
 include_once(dirname(__FILE__) . '/ACL.php');
 
@@ -61,20 +62,64 @@ class User {
 
 	public function addUser(stdClass $params){
 		try{
-			if(!$this->usernameExist($params->username)){
+			if(!$this->usernameExist($params->username) && !$this->emailExist($params->email)){
 				unset($params->fullname, $params->pwd_history1, $params->pwd_history2);
 				$user = $this->u->save($params);
 				unset($user['password'], $user['pwd_history1'], $user['pwd_history2']);
 				$user['fullname'] = Person::fullname($user['fname'], $user['mname'], $user['lname']);
 				$user['password'] = '';
+				if ($params->email != '') {
+					$our_email_address = 'admin@phoneadoctor.com';
+					$email_message = sendEmail($our_email_address,
+												'Phone A Doctor',
+												$params->email,
+												$user['fullname'],
+												'Welcome to Phone A Doctor');
+				}
 				return $user;
 			} else{
-				throw new Exception("Username \"$params->username\" exist, please try a different username");
+				throw new Exception("Username or Email exist, please try a different Username/Email");
 			}
 		} catch(Exception $e){
 			return $e;
 		}
 	}
+
+//[Add] : Sending Email Function
+	public function sendEmail($fromAddress = 'name@yourdomain.com',
+							  $fromName = 'First Last',
+							  $sentToAddress='whoto@otherdomain.com',
+							  $sendToName='John Doe',
+							  $subject = 'Email Subject',
+							  $body_contents = 'mail/contents.html'){
+
+		$mail             = new PHPMailer(); // defaults to using php "mail()"
+
+		$body             = file_get_contents($body_contents);
+		$body             = preg_replace('/[\]/','',$body);
+
+		$mail->SetFrom($fromAddress, $fromName);
+		$mail->AddReplyTo($fromAddress,$fromName);
+
+		$address = $sentToAddress;
+		$mail->AddAddress($address, $sendToName);
+
+		$mail->Subject    = $subject;
+
+		$mail->AltBody    = "To view the message, please use an HTML compatible email viewer!"; // optional, comment out and test
+
+		$mail->MsgHTML($body);
+//
+//		$mail->AddAttachment("images/phpmailer.gif");      // attachment
+//		$mail->AddAttachment("images/phpmailer_mini.gif"); // attachment
+
+		if(!$mail->Send()) {
+			return "Mailer Error: " . $mail->ErrorInfo;
+		} else {
+			return "Message sent!";
+		}
+	}
+
 
 	public function updateUser(stdClass $params){
 		unset($params->pwd_history1, $params->pwd_history2);
@@ -114,6 +159,13 @@ class User {
 
 	public function usernameExist($username){
 		$user = $this->u->load(array('username' => $username))->one();
+		return !empty($user);
+	}
+
+	//[Add] : New Users have to have a unique email
+	public function emailExist($email){
+		if ($email=='') {return false;}
+		$user = $this->u->load(array('email' => $email))->one();
 		return !empty($user);
 	}
 
@@ -158,7 +210,12 @@ class User {
 			array('username')
 		)->one();
 		$count = count($userResult);
-		return ($count != 0) ? 1 : 2;
+		//[Fixed] Encounters can only be closed on correct password inputted
+		if ($userResult) {
+			return true;
+		}
+		return false;
+		//return ($count != 0) ? 1 : 2;
 	}
 
 	public function getProviders(){
