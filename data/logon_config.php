@@ -30,6 +30,21 @@ $API = array(
             'ckAuth'=>array(
                 'len'=>0
             ),
+            'doForget'=>array( //[New] : Added
+                'len'=>1
+            ),//
+            'passwordRecovery'=>array( //[New] : Added
+                'len'=>1
+            ),
+            'doSetPID'=>array( //[New] : Added
+                'len'=>1
+            ),
+            'doCreateEncounter'=>array( //[New] : Added doCreateEncounter
+                'len'=>1
+            ),
+            'recoverPassword'=>array( //[New] : Added
+                'len'=>1
+            ),
             'unAuth'=>array(
                 'len'=>0
             ),

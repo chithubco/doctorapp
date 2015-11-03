@@ -16,11 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Ext.define('App.view.login.Login', {
+Ext.define('App.view.login.Forgot', {
 	extend: 'Ext.Viewport',
 	requires: [
-		'App.ux.combo.Languages',
-		'App.ux.combo.ActiveFacilities'
+		'App.ux.combo.Languages'
 	],
 
 	initComponent: function(){
@@ -28,17 +27,18 @@ Ext.define('App.view.login.Login', {
 		me.currSite = null;
 		me.currLang = null;
 
+		me.securityStore = Ext.create('App.store.chithub.securityquestions');
 		// setting to show site field
 		me.showSite = false;
 
-		me.siteError = window.site === false || window.site === '';
+		me.siteError = false;// window.site === false || window.site === '';
 
 		/**
 		 * The Copyright Notice Window
 		 */
 		me.winCopyright = Ext.create('widget.window', {
 			id: 'winCopyright',
-			title: 'PhoneADoctor Copyright Notice',
+			title: 'Phone A Doctor Copyright Notice',
 			bodyStyle: 'background-color: #ffffff; padding: 5px;',
 			autoLoad: 'gpl-licence-en.html',
 			closeAction: 'hide',
@@ -65,7 +65,7 @@ Ext.define('App.view.login.Login', {
 			}
 		};
 		/**
-		 * Form Layout [Login]
+		 * Form Layout [Forgot Password]
 		 */
 		me.formForgot = Ext.create('Ext.form.FormPanel', {
 			bodyStyle: 'background: #ffffff; padding:5px 5px 0',
@@ -74,30 +74,42 @@ Ext.define('App.view.login.Login', {
 			frame: false,
 			border: false,
 			width: 483,
-			autoWidth: true,
 			padding: '0 0 5 0',
-			bodyPadding: '5 5 5 5',
+			bodyPadding: '5 5 0 5',
 			baseParams: {
 				auth: 'true'
 			},
 			fieldDefaults: {
 				msgTarget: 'side',
-				labelWidth: 300
+				labelWidth: 150
 			},
 			defaults: {
 				anchor: '100%'
 			},
 			items: [
 				{
+					xtype: 'radio',
+					name: 'selectOption',
+					inputValue: 'email',
+					checked: true,
+					boxLabel: '<b>Use Email Address for Recovery</b>',
+					scope: me,
+					anchor: '100%'
+				},
+				{
+					xtype: 'displayfield',
+					fieldLabel: '',
+					anchor: '100%'
+				},
+				{
 					xtype: 'textfield',
-					fieldLabel: 'Username',
-					blankText: 'Enter your username',
-					name: 'authUser',
-					itemId: 'authUser',
-					minLengthText: 'Username must be at least 3 characters long.',
-					minLength: 3,
-					maxLength: 25,
-					allowBlank: false,
+					fieldLabel: 'Email Address',
+					blankText: 'Enter your email address',
+					name: 'authEmail',
+					itemId: 'authEmail',
+					regex:/^((([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z\s?]{2,5}){1,25})*(\s*?;\s*?)*)*$/,
+					regexText:'This field must contain a valid email address',
+					allowBlank: true,
 					validationEvent: false,
 					listeners: {
 						scope: me,
@@ -105,14 +117,28 @@ Ext.define('App.view.login.Login', {
 					}
 				},
 				{
+					xtype: 'displayfield',
+					itemId: 'blank',
+					fieldLabel: '',
+					anchor: '100%'
+				},
+				{
+					xtype: 'radio',
+					name: 'selectOption',
+					inputValue: 'phone',
+					boxLabel: '<b>Use Phone Number and Security Question & Answer for Recovery</b>',
+					scope: me,
+					anchor: '100%'
+				},
+				{
 					xtype: 'textfield',
-					blankText: 'Enter your password',
-					inputType: 'password',
-					name: 'authPass',
-					fieldLabel: 'Password',
+					blankText: 'Enter your Phone Number',
+					inputType: 'text',
+					name: 'authPhone',
+					fieldLabel: 'Phone Number',
 					minLengthText: 'Password must be at least 4 characters long.',
 					validationEvent: false,
-					allowBlank: false,
+					allowBlank: true,
 					minLength: 4,
 					maxLength: 50,
 					listeners: {
@@ -121,97 +147,54 @@ Ext.define('App.view.login.Login', {
 					}
 				},
 				{
-					xtype: 'activefacilitiescombo',
-					name: 'facility',
-					itemId: 'facility',
-					fieldLabel: 'Facility',
-					allowBlank: false,
-					editable: false,
-					hidden: true,
+					xtype: 'combo',
+					id: 'authQuestion',
+					name: 'authQuestion',
+					triggerAction:  'all',
+					forceSelection: true,
+					editable:       false,
+					allowBlank: true,
+					fieldLabel:     'Security Question',
+					mode: 'remote',
+					emptyText:'Select a Question...',
+					displayField:'question',
+					valueField: 'question',
+					store: me.securityStore
+				},
+				{
+					xtype: 'textfield',
+					blankText: 'Enter your Answer',
+					inputType: 'text',
+					name: 'authAnswer',
+					fieldLabel: 'Security Answer',
+					minLengthText: 'Answer must be at least 4 characters long.',
+					validationEvent: false,
+					allowBlank: true,
+					minLength: 4,
+					maxLength: 50,
 					listeners: {
 						scope: me,
 						specialkey: me.onEnter
-					}
-				},
-				{
-					xtype: 'languagescombo',
-					name: 'lang',
-					itemId: 'lang',
-					fieldLabel: 'Language',
-					allowBlank: false,
-					editable: false,
-					listeners: {
-						scope: me,
-						specialkey: me.onEnter,
-						select: me.onLangSelect
 					}
 				},
 				lineconfig
 			],
 			buttons: [
 				{
-					xtype: 'checkbox',
-					hidden: true,
-					name: 'checkin'
-				},
-				//'Check-In Mode',
-				{ //[Update] : Add for Forgot Password
-					text: 'Forgot Password',
-					name: 'btn_forgotPassword',
+					text: 'Cancel',
+					name: 'btn_cancel',
 					scope: me,
-					anchor: '100%',
-					handler: me.forgotSubmit
-				},
-				'->',
+					handler: me.cancelSubmit
+				},'->',
 				{
-					text: 'Login',
+					text: 'Recover Password',
 					name: 'btn_login',
 					scope: me,
 					handler: me.loginSubmit
-				},
-				'-',
-				{
-					text: 'Reset',
-					name: 'btn_reset',
-					scope: me,
-					handler: me.onFormReset
 				}
 			]
 		});
 
-		me.formForgot.getComponent('facility').getStore().on('load', me.onFacilityLoad, me);
-
-		if(me.showSite){
-			me.storeSites = Ext.create('App.store.login.Sites');
-			me.formForgot.insert(3, {
-				xtype: 'combobox',
-				name: 'site',
-				itemId: 'site',
-				displayField: 'site',
-				valueField: 'site',
-				queryMode: 'local',
-				fieldLabel: 'Site',
-				store: me.storeSites,
-				allowBlank: false,
-				editable: false,
-				msgTarget: 'side',
-				labelWidth: 300,
-				anchor: '100%',
-				listeners: {
-					scope: me,
-					specialkey: me.onEnter,
-					select: me.onSiteSelect
-				}
-			});
-		}else{
-			me.formForgot.insert(3, {
-				xtype: 'textfield',
-				name: 'site',
-				itemId: 'site',
-				hidden: true,
-				value: window.site
-			});
-		}
 
 		/**
 		 * The Logon Window
@@ -291,6 +274,15 @@ Ext.define('App.view.login.Login', {
 			this.loginSubmit();
 		}
 	},
+	//[Update] : Cancel button to lead back to main page
+	/**
+	 * Form Cancel function
+	 */
+	cancelSubmit: function(){
+		var me = this;
+
+		window.location = './';
+	},
 	/**
 	 * Form Submit/Logon function
 	 */
@@ -301,45 +293,12 @@ Ext.define('App.view.login.Login', {
 			params = form.getValues(),
 			checkInMode = me.formForgot.query('checkbox')[0].getValue();
 
-		if(form.isValid()){
-			formPanel.el.mask('Sending credentials...');
-			params.checkInMode = checkInMode;
-
-			authProcedures.login(params, function(provider, response){
-				if(response.result.success){
-					window.location = './';
-					//window.close();
-					//window.appWindow = window.open('./','app','fullscreen=yes,directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no');
-				}else{
-					Ext.Msg.show({
-						title: 'Oops!',
-						msg: response.result.message,
-						buttons: Ext.Msg.OK,
-						icon: Ext.Msg.ERROR
-					});
-					me.onFormReset();
-					formPanel.el.unmask();
-				}
-			});
-		}else{
-			this.msg('Oops!', 'Username And Password are required.');
-		}
-	},
-	/**
-	 * Form ForgotPassword function [New] : added
-	 */
-	forgotSubmit: function(){
-
-		var me = this,
-			formPanel = this.formForgot,
-			form = formPanel.getForm(),
-			params = form.getValues();
-
-		formPanel.el.mask('Sending credentials...');
-		authProcedures.doForget(params, function(provider, response){
-			formPanel.el.unmask();
-			window.location = './';
-		});
+				Ext.Msg.show({
+					title: 'Oops!',
+					msg: 'Testing',
+					buttons: Ext.Msg.OK,
+					icon: Ext.Msg.ERROR
+				});
 	},
 	/**
 	 * gets the site combobox value and store it in currSite
@@ -352,18 +311,6 @@ Ext.define('App.view.login.Login', {
 
 	onLangSelect: function(combo, value){
 		this.currLang = value[0].data.value;
-	},
-
-	onFacilityLoad: function(store, records){
-		var cmb = this.formForgot.getComponent('facility');
-
-		store.insert(0, {
-			option_name: 'Default',
-			option_value: '0'
-		});
-
-		cmb.setVisible(records.length > 1);
-		cmb.select(0);
 	},
 
 	/**
@@ -385,7 +332,7 @@ Ext.define('App.view.login.Login', {
 	 * After form is render load store
 	 */
 	afterAppRender: function(){
-		var me = this, langCmb = me.formForgot.getComponent('lang');
+		var me = this; //, langCmb = me.formForgot.getComponent('lang');
 
 		if(!me.siteError){
 			if(me.showSite){
@@ -411,16 +358,16 @@ Ext.define('App.view.login.Login', {
 				});
 			}
 
-			langCmb.store.load({
-				callback: function(){
-					me.currLang = 'en_US';
-					me.formForgot.getComponent('lang').setValue(me.currLang);
-				}
-			});
+			//langCmb.store.load({
+			//	callback: function(){
+			//		me.currLang = 'en_US';
+			//		me.formForgot.getComponent('lang').setValue(me.currLang);
+			//	}
+			//});
 
-			Ext.Function.defer(function(){
-				me.formForgot.getComponent('authUser').inputEl.focus();
-			}, 200);
+			//Ext.Function.defer(function(){
+			//	me.formForgot.getComponent('authEmail').inputEl.focus();
+			//}, 200);
 		}
 	},
 	/**

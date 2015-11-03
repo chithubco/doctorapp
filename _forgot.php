@@ -19,34 +19,11 @@
 if(!defined('_GaiaEXEC')) die('No direct access allowed.');
 $lang = (isset($_SESSION['site']['localization']) ? $_SESSION['site']['localization'] : 'en_US');
 $site = (isset($_SESSION['site']['dir']) ? $_SESSION['site']['dir'] : false);
-
-
-$site = (isset($_GET['site']) ? $_GET['site'] : 'default');
-
-$mDebug = false;
-//if($mobile->isMobile() || $mDebug){
-//	header('Location: _aire/?site='.$site);
-//}else{
-/**
- * Startup the registry
- * This contains SESSION Variables to use in the application
- * and mobile_detect class is used to detect mobile browsers.
- */
-include_once('registry.php');
-/**
- * set the site using the url parameter site, or default if not given
- */
-if(file_exists('sites/' . $site . '/conf.php')){
-    include_once('sites/' . $site . '/conf.php');
-} else {
-    $_SESSION['site'] = array('error' => 'Site configuration file not found, Please contact Support Desk. Thanks!');
-};
-
 ?>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <title>Phone-A-Doctor Logon Screen</title>
+    <title>Phone-A-Doctor Forgot Password Screen</title>
     <script type="text/javascript" src="lib/extjs-4.1.1a/ext-all.js"></script>
     <link rel="stylesheet" type="text/css" href="resources/css/ext-all-gray.css">
     <link rel="stylesheet" type="text/css" href="resources/css/style_newui.css">
@@ -71,11 +48,11 @@ if(file_exists('sites/' . $site . '/conf.php')){
             Ext.direct.Manager.addProvider(App.data[x]);
         }
         Ext.onReady(function(){
-            app = Ext.create('App.view.login.Login');
+            app = Ext.create('App.view.login.Forgot');
         });
     </script>
 </head>
-<body id="login">
+<body id="forgot">
 <div id="msg-div"></div>
 <div id="copyright">
     <!--

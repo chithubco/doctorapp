@@ -146,19 +146,6 @@ Ext.define('App.view.Viewport', {
             });
         }
 
-	    me.patientCloseCurrEncounterBtn = me.Header.add({
-            xtype: 'button',
-            scale: 'large',
-            style: 'float:left',
-            margin: '0 0 0 3',
-            cls: 'headerLargeBtn',
-            padding: 0,
-            iconCls: 'icoArrowDown',
-            scope: me,
-            handler: me.stowPatientRecord,
-            tooltip: i18n('stow_patient_record')
-        });
-
 	    me.patientCheckOutBtn = me.Header.add({
             xtype: 'button',
             scale: 'large',
@@ -304,20 +291,32 @@ Ext.define('App.view.Viewport', {
             tooltip: i18n('pool_areas')
         });
 
-        me.Header.add({
+        //me.Header.add({
+        //    xtype: 'button',
+        //    scale: 'large',
+        //    style: 'float:right',
+        //    margin: '0 0 0 3',
+        //    cls: 'headerLargeBtn',
+        //    padding: 0,
+        //    itemId: 'floorPlans',
+        //    iconCls: 'icoZoneAreasBig',
+        //    scope: me,
+        //    handler: me.goToFloorPlans,
+        //    tooltip: i18n('floor_plans')
+        //});
+
+        me.patientCloseCurrEncounterBtn = me.Header.add({
             xtype: 'button',
             scale: 'large',
             style: 'float:right',
             margin: '0 0 0 3',
             cls: 'headerLargeBtn',
             padding: 0,
-            itemId: 'floorPlans',
-            iconCls: 'icoZoneAreasBig',
+            iconCls: 'icoDashboard', //[Fix] : Change Icon to use this as dashboard
             scope: me,
-            handler: me.goToFloorPlans,
-            tooltip: i18n('floor_plans')
+            handler: me.stowPatientRecord,
+            tooltip: 'View Dashboard/Close Encounter'
         });
-
         /**
          * The panel definition for the the TreeMenu & the support button
          */
@@ -406,10 +405,10 @@ Ext.define('App.view.Viewport', {
                     items: ['-', {
                         xtype: 'button',
                         frame: true,
-                        text: 'GaiaEHR Support',
+                        text: 'Phone-A-Doctor Support', //[Change] : Changed to  Phone-A-Doctor
                         iconCls: 'icoHelp',
 	                    action: 'supportBtn',
-	                    src: 'http://gaiaehr.org/forums/'
+	                    src: 'http://www.phoneadoctor.com.ng/'
                     }, '-']
                 }
             ]
@@ -483,40 +482,41 @@ Ext.define('App.view.Viewport', {
 	                    },
 	                    '-',
                         {
-                            text: 'Copyright (C) 2011 GaiaEHR (Electronic Health Records) |:|  Open Source Software operating under GPLv3 |:| v' + me.version,
+                            text: 'Copyright (C) 2015 PAD (Phone A Doctor |:| v' + me.version,
                             iconCls: 'icoGreen',
                             disabled: true
                         },
-                        '->',
-                        {
-                            text: i18n('news'),
-	                        action: 'supportBtn',
-	                        src: 'http://GaiaEHR.org/projects/GaiaEHR001/news'
-                        },
-                        '-',
-                        {
-                            text: i18n('wiki'),
-	                        action: 'supportBtn',
-	                        src: 'http://gaiaehr.org/'
-                        },
-                        '-',
-                        {
-                            text: i18n('issues'),
-	                        action: 'supportBtn',
-                            src: 'http://gaiaehr.org:8181/issues/?jql='
-                        },
-                        '-',
-                        {
-                            text: i18n('forums'),
-	                        action: 'supportBtn',
-	                        src: 'http://gaiaehr.org/forums/'
-                        },
-                        '-',
-                        {
-                            text: '<span style="color: red">'+i18n('FACTORY RESET')+'</span>',
-                            scope: me,
-                            handler: me.resetApp
-                        }
+                        '->'
+                        //,
+                        //{
+                        //    text: i18n('news'),
+	                     //   action: 'supportBtn',
+	                     //   src: 'http://GaiaEHR.org/projects/GaiaEHR001/news'
+                        //},
+                        //'-',
+                        //{
+                        //    text: i18n('wiki'),
+	                     //   action: 'supportBtn',
+	                     //   src: 'http://gaiaehr.org/'
+                        //},
+                        //'-',
+                        //{
+                        //    text: i18n('issues'),
+	                     //   action: 'supportBtn',
+                        //    src: 'http://gaiaehr.org:8181/issues/?jql='
+                        //},
+                        //'-',
+                        //{
+                        //    text: i18n('forums'),
+	                     //   action: 'supportBtn',
+	                     //   src: 'http://gaiaehr.org/forums/'
+                        //},
+                        //'-',
+                        //{
+                        //    text: '<span style="color: red">'+i18n('FACTORY RESET')+'</span>',
+                        //    scope: me,
+                        //    handler: me.resetApp
+                        //}
                     ]
                 }
             ]
@@ -583,7 +583,7 @@ Ext.define('App.view.Viewport', {
 	},
 
 	setWindowTitle:function(facility){
-		window.document.title = 'GaiaEHR :: ' + facility;
+		window.document.title = 'Phone-A-Doctor :: ' + facility;
 	},
 
     /**
@@ -841,7 +841,7 @@ Ext.define('App.view.Viewport', {
                 if(me.patientSummaryBtn) me.patientSummaryBtn.enable();
                 if(me.patientOpenVisitsBtn) me.patientOpenVisitsBtn.enable();
                 if(me.patientCreateEncounterBtn) me.patientCreateEncounterBtn.enable();
-                if(me.patientCloseCurrEncounterBtn) me.patientCloseCurrEncounterBtn.enable();
+                //if(me.patientCloseCurrEncounterBtn) me.patientCloseCurrEncounterBtn.enable();
                 if(me.patientChargeBtn) me.patientChargeBtn.enable();
                 if(me.patientCheckOutBtn) me.patientCheckOutBtn.enable();
                 if(typeof callback == 'function') callback(me.patient);
@@ -881,7 +881,7 @@ Ext.define('App.view.Viewport', {
 		    if(me.patientCreateEncounterBtn) me.patientCreateEncounterBtn.disable();
 		    if(me.patientSummaryBtn) me.patientSummaryBtn.disable();
 		    if(me.patientOpenVisitsBtn) me.patientOpenVisitsBtn.disable();
-		    if(me.patientCloseCurrEncounterBtn) me.patientCloseCurrEncounterBtn.disable();
+		    //if(me.patientCloseCurrEncounterBtn) me.patientCloseCurrEncounterBtn.disable();
 		    if(me.patientChargeBtn) me.patientChargeBtn.disable();
 		    if(me.patientCheckOutBtn) me.patientCheckOutBtn.disable();
 		    me.patientButtonSet();
