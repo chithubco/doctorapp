@@ -230,6 +230,9 @@ $API = array(
 			'getEncounters' => array(
 				'len' => 1
 			),
+			'getDoctorEncounters' => array( //[Feature] : Add to list out all doctors encounters
+				'len' => 1
+			),
 			'getEncounter' => array(
 				'len' => 1
 			),

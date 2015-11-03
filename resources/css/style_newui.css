@@ -141,7 +141,10 @@
 .icoPoolArea {
 	background-image: url(../images/icons/icoPoolArea.png) !important;
 }
-
+.icoConsultation { /* [Feature] : Add Consultation History Icon icoConsultation */
+	background-image: url(../images/icons/services_icon.png) !important;
+	background-size: 50px 40px !important;
+}
 .icoPoolArea16 {
 	background-image: url(../images/icons/icoPoolArea16.png) !important;
 }
@@ -160,6 +163,10 @@
 
 .icoCheckOut {
 	background-image: url(../images/icons/icoCheckOut.png) !important;
+}
+
+.icoDashboard { /* [Feature] : Add new icon for dashboard */
+	background-image: url(../images/icons/icofacilities.png) !important;
 }
 
 .icoStretcher {

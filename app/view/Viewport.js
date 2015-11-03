@@ -277,6 +277,22 @@ Ext.define('App.view.Viewport', {
             tooltip: i18n('arrival_log')
         });
 
+        if(acl['add_encounters']){
+            me.Header.add({
+                xtype: 'button',
+                scale: 'large',
+                style: 'float:right',
+                margin: '0 0 0 3',
+                cls: 'headerLargeBtn',
+                padding: 0,
+                itemId: 'consultationHistory',
+                iconCls: 'icoConsultation',
+                scope: me,
+                handler: me.viewConsultationHistory,
+                tooltip: 'Consultation History'
+            });
+        }
+
         me.Header.add({
             xtype: 'button',
             scale: 'large',
@@ -761,8 +777,12 @@ Ext.define('App.view.Viewport', {
         this.nav.navigateTo('App.view.patient.VisitCheckout');
     },
 
-	openPatientVisits: function(){
+    openPatientVisits: function(){
         this.nav.navigateTo('App.view.patient.Visits');
+    },
+
+    viewConsultationHistory: function(){ //[Feature] : Doctor Viewing the list of All hist consultations
+        this.nav.navigateTo('App.view.doctor.Visits');
     },
 
 	goToPoolAreas: function(){

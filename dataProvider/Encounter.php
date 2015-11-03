@@ -156,6 +156,48 @@ class Encounter {
 	/**
 	 * @param stdClass $params
 	 * @return array
+	 *  Naming: "getPatientEncountersPerDoctor"
+	 */
+	//[Feature] : List only Encounters for a specific doctor
+	public function getDoctorEncounters(stdClass $params){
+		$provider_uid = $_SESSION['user']['id'];
+
+		if ($provider_uid == 0) {return null; }
+
+
+		$ORDERX = isset($params->sort) ? $params->sort[0]->property . ' ' . $params->sort[0]->direction : 'service_date DESC';
+		$this->db->setSQL("SELECT encounters.eid, encounters.pid, encounters.open_uid,
+							encounters.brief_description,encounters.visit_category,
+							encounters.service_date, encounters.close_date,
+							encounters.onset_date, bb.name as billing_facility,
+							TIME_FORMAT(SEC_TO_TIME(TIMESTAMPDIFF(SECOND,encounters.service_date, encounters.close_date)),'%Hh %im %ss') as duration,
+							CONCAT_WS(' ', uu.fname, uu.mname,uu.lname) as patient,
+							ff.name as facility
+							FROM encounters
+							LEFT JOIN facility ff
+							on encounters.facility=ff.id
+							LEFT JOIN facility bb
+							on encounters.billing_facility=bb.id
+							LEFT JOIN patient uu
+							on encounters.pid = uu.pid
+							WHERE  encounters.provider_uid = '$provider_uid' ORDER BY $ORDERX");
+
+		//[Update] : For encounter history to display text inside facility and biling facility instead of numbers
+		//$this->db->setSQL("SELECT * FROM encounters WHERE pid = '$pid' ORDER BY $ORDERX");
+		$rows = array();
+		foreach($this->db->fetchRecords(PDO::FETCH_ASSOC) as $row){
+			$row['status'] = ($row['close_date'] == null) ? 'open' : 'close';
+
+			//$row->provider = Person::fullname($row->fname, $row->mname, $row->lname);
+			//unset($row->fname, $row->mname, $row->lname);
+
+			array_push($rows, $row);
+		}
+		return $rows;
+	}
+	/**
+	 * @param stdClass $params
+	 * @return array
 	 *  Naming: "createPatientEncounters"
 	 */
 	public function createEncounter(stdClass $params){
