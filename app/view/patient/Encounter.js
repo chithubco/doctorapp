@@ -48,6 +48,7 @@ Ext.define('App.view.patient.Encounter', {
 	eid: null,
 
 	currEncounterStartDate: null,
+	isCheckoutButtonEnabled: true,
 	initComponent: function(){
 		var me = this;
 
@@ -460,8 +461,11 @@ Ext.define('App.view.patient.Encounter', {
 		});
 
 		if(acl['access_encounter_checkout']){
+			var isEncounteredClosed = me.isCheckoutButtonEnabled;
+
 			me.panelToolBar.add({
 				text: i18n('checkout'),
+				action: 'btnCheckout',
 				handler: me.onCheckout
 			}, '-');
 		}
@@ -713,7 +717,15 @@ Ext.define('App.view.patient.Encounter', {
 				me.pid = data.pid;
 
 				me.currEncounterStartDate = data.service_date;
-
+				//[Updated]  - Make any closed encounter to be read only, need to verify that the
+				//other buttons during a closed encounter are also read-only
+				if(!data.close_date) {
+					//me.query('button[action="btnCheckout"]')[0].setDisabled(false);
+				}
+				else {
+					//me.query('button[action="btnCheckout"]')[0].setDisabled(true);
+				}
+//todo : Timer is herer
 				if(!data.close_date){
 					me.startTimer();
 					me.setButtonsDisabled(me.getButtonsToDisable());
@@ -766,7 +778,9 @@ Ext.define('App.view.patient.Encounter', {
 			});
 		}
 		if(me.progressHistory) me.getProgressNotesHistory();
-		if(app.PreventiveCareWindow) app.PreventiveCareWindow.loadPatientPreventiveCare();
+		//[Fix]: Disable preventive care window
+		//As it is not needed right now
+		//if(app.PreventiveCareWindow) app.PreventiveCareWindow.loadPatientPreventiveCare();
 	},
 
 	/**
